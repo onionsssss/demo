@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Three框架</title>
+    <script src="three.js/build/three.js"></script>
+    <style type="text/css">
+        div#canvas-frame {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            height: 600px;
+            background-color: #EEEEEE;
+        }
+
+    </style>
+    <script>
+        var renderer;
+        function initThree() {
+            width = document.getElementById('canvas-frame').clientWidth;
+            height = document.getElementById('canvas-frame').clientHeight;
+            renderer = new THREE.WebGLRenderer({
+                antialias : true
+            });
+            renderer.setSize(width, height);
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+
+        var camera;
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.x = 0;
+            camera.position.y = 1000;
+            camera.position.z = 0;
+            camera.up.x = 0;
+            camera.up.y = 0;
+            camera.up.z = 1;
+            camera.lookAt(0,0,0);
+        }
+
+        var scene;
+        function initScene() {
+            scene = new THREE.Scene();
+        }
+
+        var light;
+        function initLight() {
+            light = new THREE.DirectionalLight(0xFF0000, 1.0, 0);
+            light.position.set(100, 100, 200);
+            scene.add(light);
+        }
+
+        var cube;
+        function initObject() {
+            /**
+             * 几何体里面有一个vertices变量，可以用来存放点
+             */
+            var geometry = new THREE.Geometry();
+
+            /**
+             * Parameters是一个定义材质外观的对象，它包含多个属性来定义材质，这些属性是：
+             * Color：线条的颜色，用16进制来表示，默认的颜色是白色。
+             * Linewidth：线条的宽度，默认时候1个单位宽度。
+             * Linecap：线条两端的外观，默认是圆角端点，当线条较粗的时候才看得出效果，如果线条很细，那么你几乎看不出效果了。
+             * Linejoin：两个线条的连接点处的外观，默认是“round”，表示圆角。
+             * VertexColors：定义线条材质是否使用顶点颜色，这是一个boolean值。意思是，线条各部分的颜色会根据顶点的颜色来进行插值。（如果关于插值不是很明白，可以QQ问我，QQ在前言中你一定能够找到，嘿嘿，虽然没有明确写出）。
+             * Fog：定义材质的颜色是否受全局雾效的影响。
+             */
+            var material = new THREE.LineBasicMaterial( { vertexColors: true } );
+
+            /**
+             * 定义两种颜色，分别表示线条两个端点的颜色
+             */
+            var color1 = new THREE.Color( 0x444444 ), color2 = new THREE.Color( 0xFF0000 );
+
+            /**
+             * 定义2个顶点的位置，并放到geometry中
+             */
+            var p1 = new THREE.Vector3( -100, 0, 100 );
+            var p2 = new THREE.Vector3(  100, 0, -100 );
+            geometry.vertices.push(p1);
+            geometry.vertices.push(p2);
+
+            /**
+             * 为4中定义的2个顶点，设置不同的颜色
+             * geometry中colors表示顶点的颜色，必须材质中vertexColors等于THREE.VertexColors 时，颜色才有效
+             * 如果vertexColors等于THREE.NoColors时，颜色就没有效果了。那么就会去取材质中color的值
+             */
+            geometry.colors.push( color1, color2 );
+
+            /**
+             * 定义一条线
+             * 定义线条，使用THREE.Line类，代码如下所示：
+             * var line = new THREE.Line( geometry, material, THREE.LinePieces );
+             * 第一个参数是几何体geometry，里面包含了2个顶点和顶点的颜色。
+             * 第二个参数是线条的材质，或者是线条的属性，表示线条以哪种方式取色。
+             * 第三个参数是一组点的连接方式，我们会在后面详细讲解。
+             * 然后，将这条线加入到场景中，代码如下：
+             * scene.add(line);
+             * 这样，场景中就会出现刚才的那条线段了。
+             */
+            var line = new THREE.Line( geometry, material, THREE.LinePieces );
+            scene.add(line);
+        }
+
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            renderer.clear();
+            renderer.render(scene, camera);
+        }
+
+        /**
+         * 在Threejs中，一条线由点，材质和颜色组成
+         * 点由THREE.Vector3表示，Threejs中没有提供单独画点的函数，它必须被放到一个THREE.Geometry形状中，
+         * 这个结构中包含一个数组vertices，这个vertices就是存放无数的点（THREE.Vector3）的数组。
+         * 为了绘制一条直线，首先我们需要定义两个点，如下代码所示：
+         * var p1 = new THREE.Vector3( -100, 0, 100 );
+         * var p2 = new THREE.Vector3( 100, 0, -100 );
+         * 然后声明一个THREE.Geometry，并把点加进入，代码如下所示：
+         * var geometry = new THREE.Geometry();
+         * geometry.vertices.push(p1);
+         * geometry.vertices.push(p2);
+         * geometry.vertices的能够使用push方法，是因为geometry.vertices是一个数组。
+         * 这样geometry 中就有了2个点了。
+         * 然后需要给线加一种材质，可以使用专为线准备的材质，THREE.LineBasicMaterial。
+         * 最终通过THREE.Line绘制了一条线，如下代码所示:
+         * var line = new THREE.Line( geometry, material, THREE.LinePieces );
+         * ok，line就是所需要的线条了。
+         */
+    </script>
+</head>
+
+<body onload="threeStart();">
+<div id="canvas-frame"></div>
+</body>
+</html>
